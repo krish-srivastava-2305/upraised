@@ -4,6 +4,9 @@ import errorHandler from './middleware/errorHandler.middleware';
 import userRouter from './routes/user.routes';
 import gadgetRouter from './routes/gadgets.routes';
 import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app: Application = express();
 

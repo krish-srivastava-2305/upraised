@@ -15,8 +15,8 @@ datasource db {
 }
 
 enum GadgetStatus {
-  ACTIVE
-  INACTIVE
+  AVAILABLE
+  DEPLOYED
   DESTROYED
   DECOMMISSIONED
 }
@@ -24,7 +24,7 @@ enum GadgetStatus {
 model Gadget {
   id          String       @id @default(uuid())
   name        String
-  status      GadgetStatus @default(ACTIVE)
+  status      GadgetStatus @default(AVAILABLE)
   destroyedAt DateTime?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
