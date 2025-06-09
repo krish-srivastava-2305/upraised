@@ -1,26 +1,66 @@
 import { NextFunction, Request, Response } from 'express';
 import APIError from '../config/apiError.config';
+import { checkCredentials, checkUserExists, createUser } from '../services/user.services';
+import { generateJWT } from '../services/jwt.services';
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password } = req.body;
-        if (!email || !password) {
-            throw new APIError(400, "Email and password are required");
-        }
-        // Simulate user authentication (replace with actual logic)
-        if (email === "user@example.com" && password === "password") {
-            res.cookie("token", "dummytoken", {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-                maxAge: 24 * 60 * 60 * 1000 // 1 day
-            });
-            res.status(200).json({ message: "Login successful" });
-        } else {
+        const user = await checkCredentials(email, password);
+
+        if (!user) {
             throw new APIError(401, "Invalid email or password");
         }
+
+        const token = generateJWT(user.id);
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 24 * 60 * 60 * 1000
+        });
+        res.status(200).json({
+            message: "Login successful",
+        });
     } catch (error) {
         next(error)
     }
 }
 
-export { login }
+const signup = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+        const userExists = await checkUserExists(email);
+        if (userExists) {
+            throw new APIError(409, "User already exists");
+        }
+
+        const newUser = await createUser(email, password);
+
+        const token = generateJWT(newUser.id);
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 24 * 60 * 60 * 1000
+        });
+        res.status(201).json({
+            message: "User created successfully",
+            user: {
+                id: newUser.id,
+                email: newUser.email,
+                createdAt: newUser.createdAt,
+                updatedAt: newUser.updatedAt
+            }
+        });
+    } catch (error) {
+        next(error)
+    }
+}
+
+const logout = (req: Request, res: Response) => {
+    res.clearCookie("token");
+    res.status(200).json({
+        message: "Logout successful"
+    });
+}
+
+export { login, signup, logout }

@@ -44,4 +44,14 @@ const updateStatus = async (id: string) => {
     return gadget
 }
 
-export { create, getGadgets, updateName, updateStatus }
+const destructor = async (id: string, otp: string) => {
+    const gadget = await prisma.gadget.update({
+        where: { id, destructOtp: otp },
+        data: {
+            status: "DESTROYED"
+        }
+    })
+    return gadget
+}
+
+export { create, getGadgets, updateName, updateStatus, destructor }
