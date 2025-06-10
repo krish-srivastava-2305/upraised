@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import envConfig from "../config/env.config";
+import APIError from "../config/apiError.config";
 
 
 const generateJWT = (userId: string): string => {
@@ -14,7 +15,7 @@ const decodeJWT = (token: string): string | jwt.JwtPayload => {
         const decoded = jwt.verify(token, envConfig.SECRET_KEY);
         return decoded;
     } catch (error) {
-        throw new Error("Invalid token");
+        throw new APIError(401, "Invalid token");
     }
 }
 

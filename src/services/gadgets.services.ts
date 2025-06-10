@@ -6,10 +6,17 @@ interface gadget {
     name: string
 }
 
-const create = async (data: gadget) => {
-    if (!data || !data.name) {
-        throw new Error("Invalid data: 'name' is required")
-    }
+interface Gadget {
+    id: string,
+    name: string,
+    status: "AVAILABLE" | "DECOMMISSIONED" | "DESTROYED" | "DEPLOYED",
+    destructOtp: string,
+    destroyedAt: Date | null,
+    createdAt: Date,
+    updatedAt: Date
+}
+
+const create = async (data: gadget): Promise<Gadget> => {
     const gadget = await prisma.gadget.create({
         data: {
             name: data.name
@@ -18,12 +25,12 @@ const create = async (data: gadget) => {
     return gadget
 }
 
-const getGadgets = async () => {
+const getGadgets = async (): Promise<Gadget[]> => {
     const gadgets = await prisma.gadget.findMany()
     return gadgets
 }
 
-const updateName = async (id: string, data: gadget) => {
+const updateName = async (id: string, data: gadget): Promise<Gadget> => {
     const gadget = await prisma.gadget.update({
         where: { id },
         data: {
@@ -34,7 +41,7 @@ const updateName = async (id: string, data: gadget) => {
     return gadget
 }
 
-const updateStatus = async (id: string) => {
+const updateStatus = async (id: string): Promise<Gadget> => {
     const gadget = await prisma.gadget.update({
         where: { id },
         data: {
@@ -44,7 +51,7 @@ const updateStatus = async (id: string) => {
     return gadget
 }
 
-const destructor = async (id: string, otp: string) => {
+const destructor = async (id: string, otp: string): Promise<Gadget | null> => {
     const gadget = await prisma.gadget.update({
         where: { id, destructOtp: otp },
         data: {

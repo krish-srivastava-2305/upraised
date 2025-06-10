@@ -12,6 +12,7 @@ export default async function auth(req: AuthRequest, res: Response, next: NextFu
         }
 
         const decodedToken = decodeJWT(token) as { id: string };
+        console.log("Decoded token:", decodedToken);
 
         if (decodedToken instanceof Error || !decodedToken) {
             throw new APIError(401, "Invalid token");

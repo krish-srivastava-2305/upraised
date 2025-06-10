@@ -1,14 +1,21 @@
 import { NextFunction, Request, Response } from 'express';
 import APIError from '../config/apiError.config';
-import { checkCredentials, checkUserExists, createUser } from '../services/user.services';
+import { comparePass, checkUserExists, createUser, hashPassword } from '../services/user.services';
 import { generateJWT } from '../services/jwt.services';
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password } = req.body;
-        const user = await checkCredentials(email, password);
+        console.log("Login attempt with email:", email);
+        const user = await checkUserExists(email);
+        console.log("User found:", user);
 
         if (!user) {
+            throw new APIError(401, "Invalid email or password");
+        }
+
+        const isMatch = await comparePass(password, user.password);
+        if (!isMatch) {
             throw new APIError(401, "Invalid email or password");
         }
 
@@ -34,7 +41,9 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
             throw new APIError(409, "User already exists");
         }
 
-        const newUser = await createUser(email, password);
+        const hashedPassword = await hashPassword(password);
+
+        const newUser = await createUser(email, hashedPassword);
 
         const token = generateJWT(newUser.id);
         res.cookie("token", token, {

@@ -19,7 +19,7 @@ gadgetRouter.post("/",
 gadgetRouter.get("/",
     auth,
     [
-        query("status").optional().isString().withMessage("Status must be a string").isIn(["DEPLOYED", "DECOMMISSIONED", "AVAILABLE", "DESTROYED"]).withMessage("Invalid status. Valid statuses are: DEPLOYED, DECOMMISSIONED, AVAILABLE, DESTROYED")
+        query("status").optional().isString().withMessage("Status must be a string")
     ],
     validateRequest,
     fetchAllGadgets
